@@ -11,9 +11,9 @@ module Spree
         def index
             payment_method_id = params[:payment_method_id]
             payment_method = Spree::PaymentMethod.find_by(id: payment_method_id)
-            success_url = paysera_confirm_path(payment_method_id)
-            callback_url = paysera_callback_path(payment_method_id)
-            cancel_url = paysera_cancel_path(payment_method_id)
+            success_url = payment_method.preferred_domain_name[0...-1].gsub("\n",'') + paysera_confirm_path(payment_method_id).gsub("\n",'')
+            callback_url = payment_method.preferred_domain_name[0...-1].gsub("\n",'') + paysera_callback_path(payment_method_id).gsub("\n",'')
+            cancel_url = payment_method.preferred_domain_name[0...-1].gsub("\n",'') + paysera_cancel_path(payment_method_id).gsub("\n",'')
             service_url = payment_method.preferred_service_url.present? ? payment_method.preferred_service_url : 'https://www.paysera.lt/pay/?'
             order = current_order || raise(ActiveRecord::RecordNotFound)
             amount = order.total*100
@@ -21,9 +21,9 @@ module Spree
             paytext_value = payment_method.preferred_message_text.present? ? payment_method.preferred_message_text : 'Payment'
             options = {
                 orderid: order.number,
-                accepturl: payment_method.preferred_domain_name[0...-1] + success_url,
-                cancelurl: payment_method.preferred_domain_name[0...-1] + cancel_url,
-                callbackurl: payment_method.preferred_domain_name[0...-1] + callback_url,
+                accepturl: success_url.gsub("\n",''),
+                cancelurl: cancel_url.gsub("\n",''),
+                callbackurl: callback_url.gsub("\n",''),
                 amount: amount.to_i,
                 currency: order.currency,
                 test: test_value,
