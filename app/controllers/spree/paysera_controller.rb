@@ -21,9 +21,9 @@ module Spree
             paytext_value = payment_method.preferred_message_text.present? ? payment_method.preferred_message_text : 'Payment'
             options = {
                 orderid: order.number,
-                accepturl: payment_method.preferred_domain_name + success_url[0...-1],
-                cancelurl: payment_method.preferred_domain_name + cancel_url[0...-1],
-                callbackurl: payment_method.preferred_domain_name + callback_url[0...-1],
+                accepturl: payment_method.preferred_domain_name[0...-1] + success_url,
+                cancelurl: payment_method.preferred_domain_name[0...-1] + cancel_url,
+                callbackurl: payment_method.preferred_domain_name[0...-1] + callback_url,
                 amount: amount.to_i,
                 currency: order.currency,
                 test: test_value,
