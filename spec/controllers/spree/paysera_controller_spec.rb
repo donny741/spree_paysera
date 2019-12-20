@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 RSpec.describe Spree::PayseraController, type: :controller do
   let(:user) { create(:user) }
   let(:order) { OrderWalkthrough.up_to(:payment) }

@@ -10,36 +10,16 @@ require 'open-uri'
 module Spree
   class PayseraController < StoreController
     protect_from_forgery only: :index
+
     def index
-      payment_method_id = params[:payment_method_id]
-      payment_method = Spree::PaymentMethod.find_by(id: payment_method_id)
-      success_url = payment_method.preferred_domain_name[0...-1].gsub("\n", '') + paysera_confirm_path(payment_method_id).gsub("\n", '')
-      callback_url = payment_method.preferred_domain_name[0...-1].gsub("\n", '') + paysera_callback_path(payment_method_id).gsub("\n", '')
-      cancel_url = payment_method.preferred_domain_name[0...-1].gsub("\n", '') + paysera_cancel_path(payment_method_id).gsub("\n", '')
+      payment_method = Spree::PaymentMethod.find_by(id: params[:payment_method_id])
+      options = Spree::Paysera::Request::Build.for(payment_method, current_order)
+
+      # redirect url builder
       service_url = payment_method.preferred_service_url.present? ? payment_method.preferred_service_url : 'https://www.paysera.lt/pay/?'
-      order = current_order || raise(ActiveRecord::RecordNotFound)
-      amount = order.total * 100
-      test_value = payment_method.preferred_test_mode ? 1 : 0
-      paytext_value = payment_method.preferred_message_text.present? ? payment_method.preferred_message_text : 'Payment'
-      options = {
-        orderid: order.number,
-        accepturl: success_url.gsub("\n", ''),
-        cancelurl: cancel_url.gsub("\n", ''),
-        callbackurl: callback_url.gsub("\n", ''),
-        amount: amount.to_i,
-        currency: order.currency,
-        test: test_value,
-        paytext: paytext_value,
-        p_firstname: order.bill_address.firstname,
-        p_lastname: order.bill_address.lastname,
-        p_street: order.bill_address.address1 + ' ' + order.bill_address.address2,
-        p_city: order.bill_address.city,
-        p_zip: order.bill_address.zipcode
-      }
       url = service_url + build_request(options)
-      begin
-        redirect_to url
-      end
+
+      redirect_to url
     end
 
     def callback
