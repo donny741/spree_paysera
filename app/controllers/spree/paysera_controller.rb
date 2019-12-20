@@ -59,12 +59,14 @@ module Spree
         details: params.to_yaml
       )
       response = parse(params)
+
+      # not working
       if response[:projectid].to_i != payment_method.preferred_project_id
         render plain: 'Error: project id does not match'
         return
       end
-      order = Spree::Order.find_by(number: response[:orderid])
 
+      order = Spree::Order.find_by(number: response[:orderid])
       money = order.total * 100
       if response[:payamount].to_i >= money.to_i
         if response[:payamount].to_i > money.to_i
@@ -135,7 +137,8 @@ module Spree
 
       flash.notice = Spree.t(:order_processed_successfully)
       begin
-        redirect_to user_root_path
+        # check if exists
+        redirect_to account_path
       end
       nil
     end

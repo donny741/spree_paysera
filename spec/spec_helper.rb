@@ -3,7 +3,7 @@
 ENV['RAILS_ENV'] = 'test'
 
 begin
-  require File.expand_path('../dummy/config/environment', __FILE__)
+  require File.expand_path('dummy/config/environment', __dir__)
 rescue LoadError
   puts 'Could not load dummy application. Please ensure you have run `bundle exec rake test_app`'
   exit
@@ -26,7 +26,7 @@ require 'pry'
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
 
- # == URL Helpers
+  # == URL Helpers
   #
   # Allows access to Spree's routes in specs:
   #
@@ -45,6 +45,7 @@ RSpec.configure do |config|
 
   # Ensure Suite is set to use transactions for speed.
   config.before :suite do
+    FactoryBot.find_definitions
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with :truncation
   end
