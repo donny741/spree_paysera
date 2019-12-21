@@ -13,7 +13,7 @@ class Spree::Paysera::ParseResponse
     @payment_method = payment_method
     @data = unescape_string(response[:data])
     @ss1 = response[:ss1]
-    @ss2 = unescape_string(response[:ss2])
+    @ss2 = decode_string(unescape_string(response[:ss2]))
   end
 
   def run
@@ -56,7 +56,7 @@ class Spree::Paysera::ParseResponse
   end
 
   def valid_ss2?
-    public_key.verify(OpenSSL::Digest::SHA1.new, decode_string(ss2), data)
+    public_key.verify(OpenSSL::Digest::SHA1.new, ss2, data)
   end
 
   def public_key

@@ -21,7 +21,7 @@ class Spree::Paysera::BuildForm
     add_order_details
 
     form = Spree::PayseraForm.new(@result)
-    raise 'Request params are not valid' unless form.valid?
+    raise Spree::Paysera::Error, 'Params are not valid' unless form.valid?
 
     form
   end
