@@ -48,17 +48,18 @@ RSpec.describe Spree::PayseraController, type: :controller do
     let(:params) do
       {
         payment_method_id: payment_method.id,
-        data: data,
-        ss1: Digest::MD5.hexdigest(data + payment_method.preferred_sign_key),
-        ss2: 'ss2'
       }
     end
-    let(:data) do
-      Base64.encode64("orderid=#{order.number}&payamount=#{order.total * 100}&projectid=#{payment_method.preferred_project_id}")
-    end
+    let(:orderid) { order.number }
+    let(:payamount) { (order.total * 100).to_s }
+    let(:projectid) { payment_method.preferred_project_id.to_s }
 
     before do
-      allow(controller).to receive_messages valid_ss2?: true
+      expect(Spree::Paysera::ParseResponse).to receive(:for).and_return(
+        orderid: orderid,
+        payamount: payamount,
+        projectid: projectid
+      )
     end
 
     it 'completes payment and renders success' do
@@ -70,120 +71,33 @@ RSpec.describe Spree::PayseraController, type: :controller do
       )
     end
 
-    context 'when data is nil' do
-      let(:params) do
-        {
-          payment_method_id: payment_method.id
-        }
-      end
-
-      it_behaves_like 'error raiser'
-    end
-
     context 'when projectid does not match' do
-      let(:data) do
-        Base64.encode64("orderid=#{order.number}&payamount=#{order.total * 100}")
-      end
+      let(:projectid) { payment_method.preferred_project_id + 1 }
 
       it_behaves_like 'error raiser'
     end
 
     context 'when orderid is invalid' do
-      let(:data) do
-        Base64.encode64("orderid=1&payamount=#{order.total * 100}&projectid=#{payment_method.preferred_project_id}")
-      end
+      let(:orderid) { 'invalid order number '}
 
       it_behaves_like 'error raiser'
-    end
-
-    context 'when payamount is less than order total' do
-      let(:data) do
-        Base64.encode64("orderid=#{order.number}&payamount=#{order.total * 100 - 1}&projectid=#{payment_method.preferred_project_id}")
-      end
-
-      it_behaves_like 'error raiser'
-    end
-
-    context 'when payamount is greater than order total' do
-      let(:data) do
-        Base64.encode64("orderid=#{order.number}&payamount=#{order.total * 100 + 1}&projectid=#{payment_method.preferred_project_id}")
-      end
-
-      it 'owes a credit' do
-        expect { subject }.to change(order.payments, :count).by 1
-        expect(subject.body).to start_with 'OK'
-        expect(order.reload).to have_attributes(
-          payment_state: 'credit_owed'
-        )
-      end
     end
   end
 
   describe '#confirm' do
     subject { get :confirm, params: params }
+
     let(:params) do
       {
         payment_method_id: payment_method.id,
-        data: data,
-        ss1: Digest::MD5.hexdigest(data + payment_method.preferred_sign_key),
-        ss2: 'ss2'
       }
     end
-
-    let(:data) do
-      Base64.encode64("orderid=#{order.number}&payamount=#{order.total * 100}&projectid=#{payment_method.preferred_project_id}")
-    end
+    let(:orderid) { order.number }
 
     before do
-      allow(controller).to receive_messages valid_ss2?: true
-    end
-
-    context 'when data is not present' do
-      let(:params) do
-        {
-          payment_method_id: payment_method.id
-        }
-      end
-
-      it_behaves_like 'account redirector'
-
-      it 'sets alert flash' do
-        subject
-        expect(flash[:alert]).to be_present
-      end
-    end
-
-    context 'when ss1 is not present' do
-      let(:params) do
-        {
-          payment_method_id: payment_method.id,
-          data: data
-        }
-      end
-
-      it_behaves_like 'account redirector'
-
-      it 'sets alert flash' do
-        subject
-        expect(flash[:alert]).to be_present
-      end
-    end
-
-    context 'when ss2 is not present' do
-      let(:params) do
-        {
-          payment_method_id: payment_method.id,
-          data: data,
-          ss1: 'adad'
-        }
-      end
-
-      it_behaves_like 'account redirector'
-
-      it 'sets alert flash' do
-        subject
-        expect(flash[:alert]).to be_present
-      end
+      expect(Spree::Paysera::ParseResponse).to receive(:for).and_return(
+        orderid: orderid
+      )
     end
 
     context 'when order is not completed' do

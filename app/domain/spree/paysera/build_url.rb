@@ -17,15 +17,15 @@ class Spree::Paysera::BuildUrl
 
   def run
     provider_url + make_query(
-      data: encoded_query,
-      sign: sign_request(encoded_query, payment_method.preferred_sign_key)
+      data: assertion,
+      sign: sign_request(assertion, payment_method.preferred_sign_key)
     )
   end
 
   private
 
-  def encoded_query
-    @encoded_query ||= encode_string(make_query(options))
+  def assertion
+    @assertion ||= encode_string(make_query(options))
   end
 
   def make_query(data)

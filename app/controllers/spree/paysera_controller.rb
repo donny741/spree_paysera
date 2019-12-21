@@ -21,13 +21,11 @@ module Spree
     end
 
     def callback
-      raise Spree::Paysera::Error if params[:data].nil?
-
       Spree::LogEntry.create(
         source: payment_method,
         details: params.to_yaml
       )
-      response = parse_response
+      response = Spree::Paysera::ParseResponse.for(payment_method, params)
 
       if response[:projectid] != payment_method.preferred_project_id.to_s
         raise Spree::Paysera::Error, 'project id does not match'
@@ -64,7 +62,7 @@ module Spree
     end
 
     def confirm
-      response = parse_response
+      response = Spree::Paysera::ParseResponse.for(payment_method, params)
 
       order = Spree::Order.find_by(number: response[:orderid])
 
@@ -88,68 +86,6 @@ module Spree
 
     def payment_method
       @payment_method ||= Spree::Gateway::Paysera.find(params[:payment_method_id])
-    end
-
-    def data
-      @data ||= params.require(:data)
-    end
-
-    def ss1
-      @ss1 ||= params.require(:ss1)
-    end
-
-    def ss2
-      @ss2 ||= params.require(:ss2)
-    end
-
-    PUBLIC_KEY = 'http://www.paysera.com/download/public.key'
-
-    def parse_response
-      projectid ||= payment_method.preferred_project_id
-      raise Spree::Paysera::Error, 'Error: projectid not found' if projectid.nil?
-
-      sign_password ||= payment_method.preferred_sign_key
-      raise Spree::Paysera::Error, 'Error: sign_password not found' if sign_password.nil?
-
-      unless valid_ss1? data, ss1, sign_password
-        raise Spree::Paysera::Error, 'ss1 verification failed'
-      end
-      unless valid_ss2? data, ss2
-        raise Spree::Paysera::Error, 'ss2 verification failed'
-      end
-
-      convert_to_hash decode_string(data)
-    end
-
-    def convert_to_hash(query)
-      Hash[query.split('&').collect do |s|
-             a = s.split('=')
-             [unescape_string(a[0]).to_sym, unescape_string(a[1])]
-           end]
-    end
-
-    def get_public_key
-      OpenSSL::X509::Certificate.new(open(PUBLIC_KEY).read).public_key
-    end
-
-    def decode_string(string)
-      Base64.decode64 string.gsub('-', '+').gsub('_', '/').gsub("\n", '')
-    end
-
-    def valid_ss1?(data, ss1, sign_password)
-      Digest::MD5.hexdigest(CGI.unescape(data) + sign_password) == ss1
-    end
-
-    def valid_ss2?(data, ss2)
-      public_key = get_public_key
-      ss2        = decode_string(unescape_string(ss2))
-      data       = unescape_string data
-
-      public_key.verify(OpenSSL::Digest::SHA1.new, ss2, data)
-    end
-
-    def unescape_string(string)
-      CGI.unescape string.to_s
     end
   end
 end
