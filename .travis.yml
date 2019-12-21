@@ -2,6 +2,9 @@ dist: trusty
 
 language: ruby
 rvm:
+  - 2.3.8
+  - 2.4.4
+  - 2.5.1
   - 2.6.3
 
 script:
@@ -17,6 +20,20 @@ gemfile:
 matrix:
   allow_failures:
         - gemfile: gemfiles/spree_master.gemfile
+  exclude:
+      - rvm: 2.3.8
+        gemfile: gemfiles/spree_4_0.gemfile
+      - rvm: 2.3.8
+        gemfile: gemfiles/spree_master.gemfile
+      - rvm: 2.4.4
+        gemfile: gemfiles/spree_4_0.gemfile
+      - rvm: 2.4.4
+        gemfile: gemfiles/spree_master.gemfile
+      - rvm: 2.5.1
+        gemfile: gemfiles/spree_3_5.gemfile
+      - rvm: 2.6.3
+        gemfile: gemfiles/spree_3_5.gemfile
+
 
 addons:
   apt:
