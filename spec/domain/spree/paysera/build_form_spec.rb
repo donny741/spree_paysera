@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Spree::Paysera::Request::Build do
+RSpec.describe Spree::Paysera::BuildForm do
   subject { described_class.for(payment_method, order) }
   let(:order) { OrderWalkthrough.up_to(:payment) }
   let(:payment_method) { create(:paysera_gateway) }
@@ -8,6 +8,7 @@ RSpec.describe Spree::Paysera::Request::Build do
   describe '.for' do
     let(:request_params) do
       {
+        projectid: payment_method.preferred_project_id,
         orderid: order.number,
         callbackurl: payment_method.preferred_domain_name.chomp('/').gsub("\n", '') + "/paysera/#{payment_method.id}/callback".gsub("\n", ''),
         accepturl: payment_method.preferred_domain_name.chomp('/').gsub("\n", '') + "/paysera/#{payment_method.id}/confirm".gsub("\n", ''),
@@ -24,7 +25,7 @@ RSpec.describe Spree::Paysera::Request::Build do
       }
     end
     it 'builds request params hash' do
-      expect(subject).to eq(request_params)
+      expect(subject).to have_attributes(request_params)
     end
   end
 end

@@ -12,12 +12,8 @@ module Spree
     protect_from_forgery only: :index
 
     def index
-      payment_method = Spree::PaymentMethod.find_by(id: params[:payment_method_id])
-      options = Spree::Paysera::Request::Build.for(payment_method, current_order)
-
-      # redirect url builder
-      service_url = payment_method.preferred_service_url.present? ? payment_method.preferred_service_url : 'https://www.paysera.lt/pay/?'
-      url = service_url + build_request(options)
+      form = Spree::Paysera::BuildForm.for(payment_method, current_order)
+      url = Spree::Paysera::BuildUrl.for(payment_method, form.attributes)
 
       redirect_to url
     end
@@ -28,10 +24,6 @@ module Spree
           redirect_to products_path
         end
         return
-      end
-      payment_method = Spree::PaymentMethod.find_by(id: params[:payment_method_id])
-      if payment_method.type != 'Spree::Gateway::Paysera'
-        raise send_error('invalid payment method')
       end
 
       Spree::LogEntry.create(
@@ -132,6 +124,10 @@ module Spree
 
     private
 
+    def payment_method
+      @payment_method ||= Spree::Gateway::Paysera.find(params[:payment_method_id])
+    end
+
     PUBLIC_KEY = 'http://www.paysera.com/download/public.key'
 
     def parse(query)
@@ -191,47 +187,6 @@ module Spree
       CGI.unescape string.to_s
     end
 
-    def build_request(paysera_params)
-      payment_method = Spree::PaymentMethod.find_by(id: params[:payment_method_id])
-      if payment_method.type != 'Spree::Gateway::Paysera'
-        raise send_error('invalid payment method')
-      end
-
-      paysera_params = Hash[paysera_params.map { |k, v| [k.to_sym, v] }]
-      paysera_params[:version]   = payment_method.preferred_api_version
-      paysera_params[:projectid] = payment_method.preferred_project_id
-      sign_password              = payment_method.preferred_sign_key
-      valid_request = validate_request(paysera_params)
-      encoded_query = encode_string make_query(valid_request)
-      signed_request = sign_request(encoded_query, sign_password)
-      query = make_query(
-        data: encoded_query,
-        sign: signed_request
-      )
-      query
-    end
-
-    def validate_request(req)
-      request = {}
-      REQUEST.each do |k, v|
-        raise "'#{k}' is required but missing" if v[:required] && req[k].nil?
-
-        req_value = req[k].to_s
-        regex     = v[:regex].to_s
-        maxlen    = v[:maxlen]
-        next if req[k].nil?
-        if maxlen && (req_value.length > maxlen)
-          raise "'#{k}' value '#{req[k]}' is too long, #{v[:maxlen]} characters allowed."
-        end
-        if (regex != '') && !req_value.match(regex)
-          raise "'#{k}' value '#{req[k]}' invalid."
-        end
-
-        request[k] = req[k]
-      end
-      request
-    end
-
     def make_query(data)
       data.collect do |key, value|
         "#{CGI.escape(key.to_s)}=#{CGI.escape(value.to_s)}"
@@ -245,119 +200,5 @@ module Spree
     def encode_string(string)
       Base64.encode64(string).gsub("\n", '').gsub('/', '_').gsub('+', '-')
     end
-
-    REQUEST = {
-      projectid: {
-        maxlen: 11,
-        required: true,
-        regex: /^\d+$/
-      },
-      orderid: {
-        maxlen: 40,
-        required: true
-      },
-      accepturl: {
-        maxlen: 255,
-        required: true
-      },
-      cancelurl: {
-        maxlen: 255,
-        required: true
-      },
-      callbackurl: {
-        maxlen: 255,
-        required: true
-      },
-      version: {
-        maxlen: 9,
-        required: true,
-        regex: /^\d+\.\d+$/
-      },
-      lang: {
-        maxlen: 3,
-        required: false,
-        regex: /^[a-z]{3}$/i
-      },
-      amount: {
-        maxlen: 11,
-        required: false,
-        regex: /^\d+$/
-      },
-      currency: {
-        maxlen: 3,
-        required: false,
-        regex: /^[a-z]{3}$/i
-      },
-      payment: {
-        maxlen: 20,
-        required: false
-      },
-      country: {
-        maxlen: 2,
-        required: false,
-        regex: /^[a-z]{2}$/i
-      },
-      paytext: {
-        maxlen: 255,
-        required: false
-      },
-      p_firstname: {
-        maxlen: 255,
-        required: false
-      },
-      p_lastname: {
-        maxlen: 255,
-        required: false
-      },
-      p_email: {
-        maxlen: 255,
-        required: false
-      },
-      p_street: {
-        maxlen: 255,
-        required: false
-      },
-      p_city: {
-        maxlen: 255,
-        required: false
-      },
-      p_state: {
-        maxlen: 20,
-        required: false
-      },
-      p_zip: {
-        maxlen: 20,
-        required: false
-      },
-      p_countrycode: {
-        maxlen: 2,
-        required: false,
-        regex: /^[a-z]{2}$/i
-      },
-      only_payments: {
-        required: false
-      },
-      disallow_payments: {
-        required: false
-      },
-      test: {
-        maxlen: 1,
-        required: false,
-        regex: /^[01]$/
-      },
-      time_limit: {
-        maxlen: 19,
-        required: false
-      },
-      personcode: {
-        maxlen: 255,
-        required: false
-      },
-      developerid: {
-        maxlen: 11,
-        required: false,
-        regex: /^\d+$/
-      }
-    }.freeze
   end
 end
