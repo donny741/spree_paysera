@@ -8,3 +8,4 @@ Gemfile.lock
 tmp
 pkg
 spec/dummy
+gemfiles/*.gemfile.lock

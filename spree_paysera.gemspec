@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'spree_extension'
   s.add_dependency 'spree_frontend', spree_version
 
+  s.add_development_dependency 'appraisal'
   s.add_development_dependency 'database_cleaner'
   s.add_development_dependency 'factory_bot', '~> 4.7'
   s.add_development_dependency 'ffaker'
