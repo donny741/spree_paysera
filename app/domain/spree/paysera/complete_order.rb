@@ -24,7 +24,7 @@ class Spree::Paysera::CompleteOrder
   private
 
   def check_payammount!
-    return if payamount.cents >= order_total.cents
+    return if payamount >= order_total
 
     raise Spree::Paysera::Error, 'bad order amount'
   end
@@ -32,7 +32,7 @@ class Spree::Paysera::CompleteOrder
   def complete_order
     payment = order.payments.create!(
       source_type: 'Spree::Gateway::Paysera',
-      amount: payamount,
+      amount: payamount.to_d,
       payment_method: payment_method
     )
     payment.complete
