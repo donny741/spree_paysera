@@ -11,26 +11,38 @@ class Spree::Paysera::ParseResponse
 
   def initialize(payment_method, response)
     @payment_method = payment_method
-    @data = response[:data]
+    @data = unescape_string(response[:data])
     @ss1 = response[:ss1]
-    @ss2 = response[:ss2]
+    @ss2 = unescape_string(response[:ss2])
   end
 
   def run
-    raise Spree::Paysera::Error, 'sign_password not found' if payment_method.preferred_sign_key.nil?
-    raise Spree::Paysera::Error, 'projectid not found' if payment_method.preferred_project_id.nil?
-    raise Spree::Paysera::Error, 'invalid ss1' unless valid_ss1?
-    raise Spree::Paysera::Error, 'invalid ss2' unless valid_ss2?
-
-    convert_to_hash decode_string(data)
+    validate!
+    result
   end
 
   private
 
+  def validate!
+    if payment_method.preferred_sign_key.nil?
+      raise Spree::Paysera::Error, 'sign_password not found'
+    end
+    if payment_method.preferred_project_id.nil?
+      raise Spree::Paysera::Error, 'projectid not found'
+    end
+    raise Spree::Paysera::Error, 'invalid ss1' unless valid_ss1?
+    raise Spree::Paysera::Error, 'invalid ss2' unless valid_ss2?
+  end
+
+  def result
+    convert_to_hash(decode_string(data))
+  end
+
   def convert_to_hash(query)
+    query = query
     Hash[query.split('&').collect do |s|
            a = s.split('=')
-           [unescape_string(a[0]).to_sym, unescape_string(a[1])]
+           [a[0].to_sym, a[1]]
          end]
   end
 
@@ -40,14 +52,11 @@ class Spree::Paysera::ParseResponse
 
   def valid_ss1?
     sign_password = payment_method.preferred_sign_key
-    Digest::MD5.hexdigest(CGI.unescape(data) + sign_password) == ss1
+    Digest::MD5.hexdigest(data + sign_password) == ss1
   end
 
   def valid_ss2?
-    ss2        = decode_string(unescape_string(ss2))
-    data       = unescape_string(data)
-
-    public_key.verify(OpenSSL::Digest::SHA1.new, ss2, data)
+    public_key.verify(OpenSSL::Digest::SHA1.new, decode_string(ss2), data)
   end
 
   def public_key

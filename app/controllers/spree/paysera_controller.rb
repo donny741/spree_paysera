@@ -1,12 +1,5 @@
 # frozen_string_literal: true
 
-require 'base64'
-require 'cgi'
-require 'digest/md5'
-require 'net/http'
-require 'uri'
-require 'openssl'
-require 'open-uri'
 module Spree
   class PayseraController < StoreController
     protect_from_forgery only: :index
@@ -25,48 +18,25 @@ module Spree
         source: payment_method,
         details: params.to_yaml
       )
-      response = Spree::Paysera::ParseResponse.for(payment_method, params)
 
-      if response[:projectid] != payment_method.preferred_project_id.to_s
-        raise Spree::Paysera::Error, 'project id does not match'
-      end
+      response = Spree::Paysera::ParseResponse.for(payment_method, params)
+      raise Spree::Paysera::Error, 'wrong project id' if response[:projectid] != payment_method.preferred_project_id.to_s
 
       order = Spree::Order.find_by!(number: response[:orderid])
 
-      money = order.total * 100
-      if response[:payamount].to_i >= money.to_i
-        if response[:payamount].to_i > money.to_i
-          payment = order.payments.create!(
-            source_type: 'Spree::Gateway::Paysera',
-            amount: response[:payamount].to_d / 100,
-            payment_method: payment_method
-          )
-          payment.complete
-          order.next
-
-          render plain: 'OK payment amount is greater than order total'
-        else
-          payment = order.payments.create!(
-            source_type: 'Spree::Gateway::Paysera',
-            amount: response[:payamount].to_d / 100,
-            payment_method: payment_method
-          )
-          payment.complete
-          order.next
-
-          render plain: 'OK'
-        end
+      Spree::Paysera::CompleteOrder.for(order, payment_method, response)
+      if order.paid?
+        render plain: 'OK'
       else
-        raise Spree::Paysera::Error, 'bad order amount'
+        render plain: 'Error'
       end
     end
 
     def confirm
       response = Spree::Paysera::ParseResponse.for(payment_method, params)
-
       order = Spree::Order.find_by(number: response[:orderid])
 
-      if %w[paid credit_owed].include?(order.payment_state)
+      if order.paid?
         flash.notice = Spree.t(:order_processed_successfully)
       else
         flash.alert = Spree.t(:payment_processing_failed)

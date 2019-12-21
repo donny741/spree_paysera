@@ -11,7 +11,7 @@ RSpec.describe Spree::Paysera::ParseResponse do
       ss2: 'ss2'
     }
   end
-  let(:data) { Base64.encode64(CGI.unescape('orderid=R4131&amount=9400')) }
+  let(:data) { Base64.encode64("orderid=R4131&amount=9400&projectid=#{payment_method.preferred_project_id}") }
 
   before do
     allow_any_instance_of(described_class).to receive_messages valid_ss2?: true
