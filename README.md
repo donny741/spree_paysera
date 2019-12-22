@@ -1,9 +1,9 @@
 ## [Paysera](https://www.paysera.com/v2/en-GB/index) payment gateway integration for [Spree Ecommerce](https://spreecommerce.org).
 
-
 [![Build Status](https://travis-ci.org/donny741/spree_paysera.svg?branch=master)](https://travis-ci.org/donny741/spree_paysera)
 
-
+Adds Paysera payment option to the checkout view. Can be customized by editing `paysera` partial.
+Tested on Spree version 3.5+.
 
 
 ## Installation
