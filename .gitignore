@@ -9,3 +9,4 @@ tmp
 pkg
 spec/dummy
 gemfiles/*.gemfile.lock
+.env
