@@ -113,25 +113,19 @@ RSpec.describe Spree::PayseraController, type: :controller do
       context 'when data is invalid' do
         let(:data) { ENV['DATA'] + 'a' }
 
-        it 'responds with error' do
-          expect(subject.body).to start_with('Error')
-        end
+        it_behaves_like 'error raiser'
       end
 
       context 'when ss1 is invalid' do
         let(:ss1) { ENV['SS1'] + 'a' }
 
-        it 'responds with error' do
-          expect(subject.body).to start_with('Error')
-        end
+        it_behaves_like 'error raiser'
       end
 
       context 'when ss2 is invalid' do
-        let(:ss2) { 'a' + ENV['SS2']}
+        let(:ss2) { 'a' + ENV['SS2'] }
 
-        it 'responds with error' do
-          expect(subject.body).to start_with('Error')
-        end
+        it_behaves_like 'error raiser'
       end
 
       context 'when payamount is greater than order total' do
@@ -145,9 +139,7 @@ RSpec.describe Spree::PayseraController, type: :controller do
       context 'when payamount is less than order total' do
         let(:order_total) { ENV.fetch('ORDER_TOTAL').to_d + 1.to_d }
 
-        it 'responds with error' do
-          expect(subject.body).to start_with('Error')
-        end
+        it_behaves_like 'error raiser'
       end
     end
   end
