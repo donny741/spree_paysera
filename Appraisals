@@ -7,7 +7,7 @@ end
 
 appraise 'spree-3-7' do
   gem 'spree', '~> 3.7.1'
-  gem 'spree_auth_devise', '~> 3.3.0'
+  gem 'spree_auth_devise', '~> 3.5.2'
 end
 
 appraise 'spree-4-0' do

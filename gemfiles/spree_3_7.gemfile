@@ -3,7 +3,7 @@
 source "https://rubygems.org"
 
 gem "spree", "~> 3.7.1"
-gem "spree_auth_devise", "~> 3.3.0"
+gem "spree_auth_devise", "~> 3.5.2"
 gem "rails-controller-testing"
 gem "rspec-rails"
 

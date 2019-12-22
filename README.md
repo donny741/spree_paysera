@@ -1,4 +1,7 @@
 # spree_paysera
+
+[![Build Status](https://travis-ci.org/donny741/spree_paysera.svg?branch=master)](https://travis-ci.org/donny741/spree_paysera)
+
 Paysera payment gateway integration for Spree Ecommerce.
 
 
