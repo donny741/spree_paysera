@@ -7,9 +7,9 @@ Paysera payment gateway integration for Spree Ecommerce.
 
 ## Installation
 
-1. Add this to your gemfile:
+1. Add gem to your gemfile:
 
-        gem 'spree_paysera', :github => 'donny741/spree_paysera'
+        gem 'spree_paysera', '~> 1.0', '>= 1.0.1'
 
 2. Install the gem using Bundler:
 
@@ -19,6 +19,4 @@ Paysera payment gateway integration for Spree Ecommerce.
 
 ## Setup
 
-In Spree admin panel go to "Configuration", "Payment Methods". Create a new payment method. Select provider "Spree::Gateway::Paysera", enter name and description. Click "Create". Enter project id, domain name (example: https://www.example.com) and message text (paytext).
-
-For production untick "Test Mode".
+In Spree admin panel go to "Configuration" > "Payment Methods". Create a new payment method. Select provider "Spree::Gateway::Paysera", enter name and description. Click "Create". Enter project id, domain name and message text (paytext). Untick production "Test Mode" for use in production.
