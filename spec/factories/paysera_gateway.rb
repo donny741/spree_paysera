@@ -4,13 +4,9 @@ FactoryBot.define do
   factory :paysera_gateway, class: Spree::Gateway::Paysera do
     name { 'Paysera' }
 
-    # to write new specs please provide proper credentials
-    # either here or in dummy secrets.yml file. Values will
-    # be recorded on VCR, so they can be safely replaced with
-    # placeholder afterwards
     transient do
-      project_id { Rails.application.secrets.project_id || 'change me' }
-      sign_key { Rails.application.secrets.sign_key || 'change me' }
+      project_id { ENV.fetch('PROJECT_ID', 'change me') }
+      sign_key { ENV.fetch('SIGN_PASSWORD', 'change me') }
       domain_name { 'https://dommy.domain' }
       message_text { 'Dummy payment' }
     end

@@ -5,14 +5,20 @@ RSpec.describe Spree::Paysera::BuildForm do
   let(:order) { OrderWalkthrough.up_to(:payment) }
   let(:payment_method) { create(:paysera_gateway) }
 
+  shared_examples 'attributes builder' do
+    it 'builds attributes' do
+      expect(subject).to have_attributes(request_params)
+    end
+  end
+
   describe '.for' do
     let(:request_params) do
       {
         projectid: payment_method.preferred_project_id,
         orderid: order.number,
-        callbackurl: payment_method.preferred_domain_name.chomp('/').gsub("\n", '') + "/paysera/#{payment_method.id}/callback".gsub("\n", ''),
-        accepturl: payment_method.preferred_domain_name.chomp('/').gsub("\n", '') + "/paysera/#{payment_method.id}/confirm".gsub("\n", ''),
-        cancelurl: payment_method.preferred_domain_name.chomp('/').gsub("\n", '') + "/paysera/#{payment_method.id}/cancel".gsub("\n", ''),
+        callbackurl: payment_method.preferred_domain_name.chomp('/') + "/paysera/#{payment_method.id}/callback",
+        accepturl: payment_method.preferred_domain_name.chomp('/') + "/paysera/#{payment_method.id}/confirm",
+        cancelurl: payment_method.preferred_domain_name.chomp('/') + "/paysera/#{payment_method.id}/cancel",
         amount: (order.total * 100).to_i,
         currency: order.currency,
         test: payment_method.preferred_test_mode ? 1 : 0,
@@ -24,8 +30,12 @@ RSpec.describe Spree::Paysera::BuildForm do
         p_zip: order.bill_address.zipcode
       }
     end
-    it 'builds request params hash' do
-      expect(subject).to have_attributes(request_params)
+    it_behaves_like 'attributes builder'
+
+    context 'when domain name has / in the end' do
+      let(:payment_method) { create(:paysera_gateway, domain_name: 'https://example.com/') }
+
+      it_behaves_like 'attributes builder'
     end
   end
 end

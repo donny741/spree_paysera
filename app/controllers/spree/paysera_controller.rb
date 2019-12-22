@@ -25,11 +25,7 @@ module Spree
       order = Spree::Order.find_by!(number: response[:orderid])
 
       Spree::Paysera::CompleteOrder.for(order, payment_method, response)
-      if order.paid?
-        render plain: 'OK'
-      else
-        render plain: 'Error'
-      end
+      render plain: 'OK'
     end
 
     def confirm

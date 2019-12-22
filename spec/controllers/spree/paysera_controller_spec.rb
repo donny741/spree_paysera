@@ -84,6 +84,66 @@ RSpec.describe Spree::PayseraController, type: :controller do
     end
   end
 
+  if ENV['SIGN_PASSWORD']
+    describe '#callback with real request data' do
+      subject { get :callback, params: params }
+      let(:order) do
+        order = OrderWalkthrough.up_to(:payment)
+        order.update(number: ENV.fetch('ORDER_NUMBER'), total: order_total)
+        order
+      end
+
+      let(:params) do
+        {
+          payment_method_id: payment_method.id,
+          data: data,
+          ss1: ss1,
+          ss2: ss2
+        }
+      end
+      let(:data) { ENV['DATA'] }
+      let(:ss1) { ENV['SS1'] }
+      let(:ss2) { ENV['SS2'] }
+      let(:order_total) { ENV.fetch('ORDER_TOTAL').to_d }
+
+      it 'completes the order' do
+        expect(subject.body).to start_with('OK')
+      end
+
+      context 'when data is invalid' do
+        let(:data) { ENV['DATA'] + 'a' }
+
+        it_behaves_like 'error raiser'
+      end
+
+      context 'when ss1 is invalid' do
+        let(:ss1) { ENV['SS1'] + 'a' }
+
+        it_behaves_like 'error raiser'
+      end
+
+      context 'when ss2 is invalid' do
+        let(:ss2) { 'a' + ENV['SS2'] }
+
+        it_behaves_like 'error raiser'
+      end
+
+      context 'when payamount is greater than order total' do
+        let(:order_total) { ENV.fetch('ORDER_TOTAL').to_d - 1.to_d }
+
+        it 'completes the order' do
+          expect(subject.body).to start_with('OK')
+        end
+      end
+
+      context 'when payamount is less than order total' do
+        let(:order_total) { ENV.fetch('ORDER_TOTAL').to_d + 1.to_d }
+
+        it_behaves_like 'error raiser'
+      end
+    end
+  end
+
   describe '#confirm' do
     subject { get :confirm, params: params }
 
