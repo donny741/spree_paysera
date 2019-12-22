@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/donny741/spree_paysera.svg?branch=master)](https://travis-ci.org/donny741/spree_paysera)
 
-Paysera payment gateway integration for Spree Ecommerce.
+[Paysera](https://www.paysera.com/v2/en-GB/index) payment gateway integration for [Spree Ecommerce](https://spreecommerce.org).
 
 
 ## Installation
@@ -19,4 +19,8 @@ Paysera payment gateway integration for Spree Ecommerce.
 
 ## Setup
 
-In Spree admin panel go to "Configuration" > "Payment Methods". Create a new payment method. Select provider "Spree::Gateway::Paysera", enter name and description. Click "Create". Enter project id, domain name and message text (paytext). Untick production "Test Mode" for use in production.
+- In Spree admin panel go to "Configuration" > "Payment Methods".
+- Create a new payment method.
+- Select provider "Spree::Gateway::Paysera", enter name and description.
+- Click "Create".
+- Enter Project ID, Domain Name and Message Text (paytext). Untick "Test Mode" for use in production.
