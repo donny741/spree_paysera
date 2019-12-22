@@ -6,14 +6,18 @@ $LOAD_PATH.unshift lib unless $LOAD_PATH.include?(lib)
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_paysera'
-  s.version     = '1.0.0'
-  s.summary     = 'Spree integration with Paysera.'
-  s.description = 'Spree integration with Paysera.'
+  s.version     = '1.0.1'
+  s.summary     = 'Spree Paysera.'
+  s.description = 'Paysera integration for Spree'
+  s.required_ruby_version = '>= 2.0.0'
 
   s.author    = 'Donatas Povilaitis'
   s.email     = 'ddonatasjar@gmail.com'
-  s.homepage  = 'https://github.com/donny741/'
+  s.homepage  = 'https://github.com/donny741/spree_paysera'
+  s.license   = 'MIT'
 
+  s.files        = `git ls-files`.split("\n")
+  s.test_files   = `git ls-files -- spec/*`.split("\n")
   s.require_path = 'lib'
   s.requirements << 'none'
 
