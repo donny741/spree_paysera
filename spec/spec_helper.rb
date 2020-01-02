@@ -23,6 +23,15 @@ require 'spree/testing_support/order_walkthrough'
 
 require 'pry'
 
+require 'simplecov'
+SimpleCov.start do
+  add_filter 'spec/dummy'
+  add_group 'Controllers', 'app/controllers'
+  add_group 'Domain', 'app/domain'
+  add_group 'Models', 'app/models'
+  add_group 'Libraries', 'app/lib'
+end
+
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
 
