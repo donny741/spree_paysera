@@ -1,11 +1,11 @@
-<span class="pay-with-text" style="font-size:20pt"><%=Spree.t(:pay_with, scope: 'paysera')%></span> <br /><br />
-  <%= link_to(image_tag(payment_method.preferred_image_url), paysera_proceed_url(:payment_method_id => payment_method.id), :method => :post, :id => "paysera_button") %>
-<br /><br />
-<style>
-  .pay-with-text {
-      padding-bottom: 10px;
-  }
-</style>
+<span class="pay-with-text" style="display: block; font-size:20pt"><%=Spree.t(:pay_with, scope: 'paysera')%></span>
+<%= link_to(
+  image_tag(payment_method.preferred_image_url, style: 'margin-bottom: 10px'),
+  paysera_proceed_url(payment_method_id: payment_method.id),
+  method: :post,
+  id: 'paysera_button')
+%>
+
 <script>
   Paysera = {
       updateSaveAndContinueVisibility: function() {
