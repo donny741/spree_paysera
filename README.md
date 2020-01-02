@@ -1,4 +1,4 @@
-## [Paysera](https://www.paysera.com/v2/en-GB/index) payment gateway integration for [Spree Ecommerce](https://spreecommerce.org).
+## Paysera payment gateway integration for [Spree Ecommerce](https://spreecommerce.org).
 
 [![Build Status](https://travis-ci.org/donny741/spree_paysera.svg?branch=master)](https://travis-ci.org/donny741/spree_paysera)
 
@@ -10,7 +10,7 @@ Tested on Spree version 3.5+.
 
 1. Add gem to your gemfile:
 
-        gem 'spree_paysera', '~> 1.0', '>= 1.0.1'
+        gem 'spree_paysera', '~> 1.0', '>= 1.0.2'
 
 2. Install the gem using Bundler:
 
