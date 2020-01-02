@@ -6,7 +6,7 @@ $LOAD_PATH.unshift lib unless $LOAD_PATH.include?(lib)
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_paysera'
-  s.version     = '1.0.1'
+  s.version     = '1.0.2'
   s.summary     = 'Spree Paysera.'
   s.description = 'Paysera integration for Spree'
   s.required_ruby_version = '>= 2.0.0'
