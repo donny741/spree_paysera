@@ -48,6 +48,7 @@ class Spree::Paysera::BuildForm
       orderid: order.number,
       amount: order.total.to_money.cents,
       currency: order.currency,
+      p_email: order.email,
       p_firstname: address.firstname,
       p_lastname: address.lastname,
       p_street: address.address1 + ' ' + address.address2,

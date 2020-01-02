@@ -23,6 +23,7 @@ RSpec.describe Spree::Paysera::BuildForm do
         currency: order.currency,
         test: payment_method.preferred_test_mode ? 1 : 0,
         paytext: payment_method.preferred_message_text.present? ? payment_method.preferred_message_text : 'Payment',
+        p_email: order.email,
         p_firstname: order.bill_address.firstname,
         p_lastname: order.bill_address.lastname,
         p_street: order.bill_address.address1 + ' ' + order.bill_address.address2,
