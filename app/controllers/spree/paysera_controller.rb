@@ -18,20 +18,13 @@ module Spree
         source: payment_method,
         details: params.to_yaml
       )
+      raise Spree::Paysera::Error, 'wrong project id' if paysera_response[:projectid] != payment_method.preferred_project_id.to_s
 
-      response = Spree::Paysera::ParseResponse.for(payment_method, params)
-      raise Spree::Paysera::Error, 'wrong project id' if response[:projectid] != payment_method.preferred_project_id.to_s
-
-      order = Spree::Order.find_by!(number: response[:orderid])
-
-      Spree::Paysera::CompleteOrder.for(order, payment_method, response)
+      Spree::Paysera::CompleteOrder.for(order, payment_method, paysera_response)
       render plain: 'OK'
     end
 
     def confirm
-      response = Spree::Paysera::ParseResponse.for(payment_method, params)
-      order = Spree::Order.find_by(number: response[:orderid])
-
       if order.paid?
         flash.notice = Spree.t(:order_processed_successfully)
       else
@@ -52,6 +45,14 @@ module Spree
 
     def payment_method
       @payment_method ||= Spree::Gateway::Paysera.find(params[:payment_method_id])
+    end
+
+    def paysera_response
+      @paysera_response ||= Spree::Paysera::ParseResponse.for(payment_method, params)
+    end
+
+    def order
+      @order ||= Spree::Order.find_by!(number: paysera_response[:orderid])
     end
   end
 end
